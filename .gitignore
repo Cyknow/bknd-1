@@ -1,0 +1,6 @@
+node_module
+.env
+# .DS_Store
+# .vscode
+# npm-debug.log
+# yarn-error.log
