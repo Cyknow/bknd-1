@@ -1,3 +1,8 @@
+// import dns from 'node:dns';
+
+// // Force Node.js to use Google DNS for all resolutions
+// dns.setServers(['8.8.8.8', '8.8.4.4']);
+
 import express, { Application, Request, Response } from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
