@@ -1,7 +1,7 @@
 import express from 'express';
-import * as authController from '../controllers/authController';
-import { protect } from '../middleware/authMiddleware';
-import { restrictTo } from '../middleware/restrictTo';
+import * as authController from '../controllers/authController.js';
+import { protect } from '../middleware/authMiddleware.js';
+import { restrictTo } from '../middleware/restrictTo.js';
 
 const router = express.Router();
 

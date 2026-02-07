@@ -1,35 +1,48 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, 
+  NextFunction 
+} from 'express';
 import crypto from 'crypto';
-import User from '../models/User';
-import { createSendToken } from '../utils/authUtils';
-import sendEmail from '../utils/email';
-import catchAsync from '../utils/catchAsync'; // Ensure path is correct
-import AppError from '../utils/appError';   // Ensure path is correct
-import { getPasswordResetTemplate } from '../utils/emailTemplate';
+import User from '../models/User.js';
+import { createSendToken } from '../utils/authUtils.js';
+import sendEmail from '../utils/email.js';
+import catchAsync from '../utils/catchAsync.js'; // Ensure path is correct
+import AppError from '../utils/appError.js';   // Ensure path is correct
+import { getPasswordResetTemplate } from '../utils/emailTemplate.js';
+import { LoginInput, SignupInput, UpdateMeInput } from '../models/zodUser.schema.js';
 
 /**
  * @desc    1. SIGNUP
  */
-export const signup = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const newUser = await User.create({
-    name: req.body.name,
-    email: req.body.email,
-    password: req.body.password,
-    phone: req.body.phone,
-  });
-
+export const signup = catchAsync(async (
+  req: Request <{}, {}, SignupInput>, // Typed Body
+  res: Response, 
+  // next: NextFunction 
+) => {
+  // No need for "if (!req.body.name)" anymore. Zod guaranteed it exists.
+  // Zod already stripped unwanted fields and validated requirements
+  const newUser = await User.create(req.body);
   createSendToken(newUser, 201, res);
 });
+// const newUser = await User.create({
+//     name: req.body.name,
+//     email: req.body.email,
+//     password: req.body.password,
+//     phone: req.body.phone,
+//   });
 
 /**
  * @desc    2. LOGIN
  */
-export const login = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const { email, password } = req.body;
+export const login = catchAsync(async (
+  req: Request<{}, {}, LoginInput>, //typed body!
+  res: Response, 
+  next: NextFunction
+) => {
+  const { email, password } = req.body; // TS knows these are strings
 
-  if (!email || !password) {
-    return next(new AppError('Please provide email and password', 400));
-  }
+  // if (!email || !password) {
+  //   return next(new AppError('Please provide email and password', 400));
+  // }
 
   // 1) Check if user exists & password is correct
   const user = await User.findOne({ email }).select('+password');
@@ -54,7 +67,10 @@ export const login = catchAsync(async (req: Request, res: Response, next: NextFu
 /**
  * @desc    3. LOGOUT
  */
-export const logout = (req: Request, res: Response) => {
+export const logout = (
+  // req: Request, 
+  res: Response
+) => {
   res.cookie('jwt', 'loggedout', {
     expires: new Date(Date.now() + 10 * 1000),
     httpOnly: true,
@@ -132,20 +148,26 @@ export const resetPassword = catchAsync(async (req: Request, res: Response, next
 /**
  * @desc    6. UPDATE PROFILE
  */
-export const updateMe = catchAsync(async (req: any, res: Response, next: NextFunction) => {
+export const updateMe = catchAsync(async (
+  req: Request<{}, {}, UpdateMeInput>, 
+  res: Response, 
+  // next: NextFunction
+) => {
   // 1) Create error if user POSTs password data
-  if (req.body.password) {
-    return next(new AppError('This route is not for password updates. Please use /updateMyPassword.', 400));
-  }
+  // if (req.body.password) {
+  //   return next(new AppError('This route is not for password updates. Please use /updateMyPassword.', 400));
+  // }
 
-  // 2) Filtered out unwanted fields names that are not allowed to be updated
-  const filteredBody: any = {};
-  ['name', 'email', 'phone'].forEach((el) => {
-    if (req.body[el]) filteredBody[el] = req.body[el];
-  });
+  // 1) req.body is already filtered by Zod .strict(), so no need to manual filter!
+  
+  // // 2) Filtered out unwanted fields names that are not allowed to be updated
+  // const filteredBody: any = {};
+  // ['name', 'email', 'phone'].forEach((el) => {
+  //   if (req.body[el]) filteredBody[el] = req.body[el];
+  // });
 
   // 3) Update user document
-  const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
+  const updatedUser = await User.findByIdAndUpdate(req.user.id, req.body, {
     new: true,
     runValidators: true,
   });
@@ -161,7 +183,10 @@ export const updateMe = catchAsync(async (req: any, res: Response, next: NextFun
 /**
  * @desc    Get all users (Admin only)
  */
-export const getAllUsers = catchAsync(async (req: Request, res: Response) => {
+export const getAllUsers = catchAsync(async (
+  // req: Request, 
+  res: Response
+) => {
   const users = await User.find();
 
   res.status(200).json({

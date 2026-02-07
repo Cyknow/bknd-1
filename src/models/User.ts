@@ -1,5 +1,5 @@
 import { Schema, model, Document } from 'mongoose';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 
 // 1. Define the User Interface

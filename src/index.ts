@@ -3,34 +3,34 @@
 // // Force Node.js to use Google DNS for all resolutions
 // dns.setServers(['8.8.8.8', '8.8.4.4']);
 
-import express, { Application, Request, Response } from 'express';
+import express, { Application, NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import mongoSanitize from 'express-mongo-sanitize';
-import xss from 'xss-clean';
+// import mongoSanitize from 'express-mongo-sanitize';
+// import xss from 'xss-clean';
 
 
 // Import your logic
-import authRoutes from './routes/authRoutes';
-import globalErrorHandler from './controllers/errorController';
-import AppError from './utils/appError';
-import connectDB from './config/db'; // Using the production standard DB function we created
-import userMgtRoutes from './routes/userMgtRoutes';
+import authRoutes from './routes/authRoutes.js';
+import globalErrorHandler from './controllers/errorController.js';
+import AppError from './utils/appError.js';
+import connectDB from './config/db.js'; // Using the production standard DB function we created
+import userMgtRoutes from './routes/userMgtRoutes.js';
 
 // 1. CONFIGURATION
 dotenv.config();
 const app: Application = express();
 const PORT = process.env.PORT || 6199;
 
-// 2. DATABASE CONNECTION
+// // 2. DATABASE CONNECTION
 mongoose
 connectDB();
 
-// 3. GLOBAL MIDDLEWARE
+// 3. GLOBAL MIDDLEWARE or Strict Security Stack
 // Set security HTTP headers (Must be at the top)
 app.use(helmet());
 
@@ -48,27 +48,43 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
-// Body parser, reading data from body into req.body
-app.use(express.json({ limit: '10kb' })); 
-app.use(cookieParser());
-
-// 1. Body parser (limit to 10kb for security)
+// Optimized Parser or Body parser, reading data from body into req.body
 app.use(express.json({ limit: '10kb' }));
 
-// 2. Data sanitization against NoSQL query injection
-// MUST be placed after the body parser
-app.use(mongoSanitize());
-
-// ... after mongoSanitize
-app.use(xss());
-
-// DATA SANITIZATION: Against NoSQL query injection
-// This prevents attacks like: { "email": { "$gt": "" }, "password": "any" }
-// app.use(mongoSanitize());
+// app.use(express.urlencoded({extended:true}))
+app.use(cookieParser());
 
 if (process.env.NODE_ENV === 'production') {
   app.set('trust proxy', 1);
 }
+
+/**
+ * Advanced NoSQL Injection Protection
+ * Recursively strips keys starting with '$' or containing '.' 
+ * from req.body, req.query, and req.params.
+ */
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const sanitize = (obj: any) => {
+    if (obj && typeof obj === 'object') {
+      Object.keys(obj).forEach((key) => {
+        // 1. Check if the key is dangerous
+        // We check for '$' at the start and '.' anywhere in the key
+        if (key.startsWith('$') || key.includes('.')) {
+          delete obj[key];
+        } 
+        // 2. If the value is another object/array, dig deeper
+        else if (obj[key] && typeof obj[key] === 'object') {
+          sanitize(obj[key]);
+        }
+      });
+    }
+  };
+
+  // Clean all three primary input sources
+  [req.body, req.query, req.params].forEach(sanitize);
+
+  next();
+});
 
 // 4. ROUTES
 app.use('/api/v1/auth', authRoutes);
@@ -79,14 +95,30 @@ app.get('/', (req: Request, res: Response) => {
   res.status(200).json({ message: 'Vanguard API is running...' });
 });
 
-// 5. ERROR HANDLING
-// Handle undefined routes
-// 1. Handle unhandled routes (404)
+// 5.Catch-all for Express 5 ERROR HANDLING, 
+// Handle undefined routes Handle unhandled routes (404)
+app.all('/*splat', (req, res, next) => {
+  next(new AppError(`Route ${req.originalUrl} not found`, 404));
+});
+
+// Global error handler (MUST be at the bottom)
+app.use(globalErrorHandler);
+
+// 6. START SERVER
+app.listen(PORT, () => {
+  console.log(`🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+});
+
+
+
+
+
+
 
 // ✅ The newer, safer way to handle catch-all routes
-app.all(/.*/, (req, res, next) => {
-  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
-});
+// app.all(/.*/, (req, res, next) => {
+//   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+// });
 
 // app.all('*', (req, res, next) => {
 //   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
@@ -99,16 +131,48 @@ app.all(/.*/, (req, res, next) => {
 //   });
 // });
 
-// Global error handler (MUST be at the bottom)
-app.use(globalErrorHandler);
+// 2. Data sanitization against NoSQL query injection
+// MUST be placed after the body parser
+// app.use(
+//   mongoSanitize({
+//     replaceWith: "_",
+//     sanitizeQuery: false, // REQUIRED
+//   })
+// );
 
-// 6. START SERVER
-app.listen(PORT, () => {
-  console.log(`🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
-});
+// app.use((req, _res, next) => {
+//   const dangerousKeys = ["$", "."];
+//   for (const key of Object.keys(req.body || {})) {
+//     if (dangerousKeys.some(d => key.includes(d))) {
+//       delete req.body[key];
+//     }
+//   }
+//   next();
+// });
 
 
+// ... after mongoSanitize
+// app.use(xss());
 
+// DATA SANITIZATION: Against NoSQL query injection
+// This prevents attacks like: { "email": { "$gt": "" }, "password": "any" }
+// app.use(mongoSanitize());
+
+
+// // 3. Custom NoSQL Injection Protection (Simple & Modern)
+// app.use((req, res, next) => {
+//   const sanitize = (obj: any) => {
+//     if (obj instanceof Object) {
+//       for (const key in obj) {
+//         if (key.startsWith('$')) delete obj[key];
+//         else sanitize(obj[key]);
+//       }
+//     }
+//   };
+//   sanitize(req.body);
+//   sanitize(req.query);
+//   next();
+// });
 
 
 

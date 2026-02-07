@@ -1,4 +1,4 @@
-import AppError from '../utils/appError';
+import AppError from '../utils/appError.js';
 
 // This is a "factory function" that returns the actual middleware
 export const restrictTo = (...roles: string[]) => {

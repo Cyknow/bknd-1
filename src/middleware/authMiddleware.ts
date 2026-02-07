@@ -1,9 +1,11 @@
-import { Request, Response, NextFunction } from 'express';
+import { 
+  // Request, 
+  Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { promisify } from 'util';
-import User from '../models/User';
-import AppError from '../utils/appError';
-import catchAsync from '../utils/catchAsync';
+import User from '../models/User.js';
+import AppError from '../utils/appError.js';
+import catchAsync from '../utils/catchAsync.js';
 
 export const protect = catchAsync(async (req: any, res: Response, next: NextFunction) => {
   // 1) Getting token and check if it exists

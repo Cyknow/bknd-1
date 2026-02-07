@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import jwt, { SignOptions } from 'jsonwebtoken';
-import { IUser } from '../models/User';
+import { IUser } from '../models/User.js';
 
 export const signToken = (id: string): string => {
   const secret = process.env.JWT_SECRET as string;
