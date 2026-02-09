@@ -7,7 +7,7 @@ export const signToken = (id: string): string => {
   
   const options: SignOptions = {
     // expiresIn from env is usually a string like '30d'
-    expiresIn: (process.env.JWT_EXPIRES_IN as any) || '1d',
+    expiresIn: (process.env.JWT_EXPIRES_IN as any) || '7d',
   };
 
   return jwt.sign({ id }, secret, options);

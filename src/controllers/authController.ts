@@ -10,6 +10,7 @@ import AppError from '../utils/appError.js';   // Ensure path is correct
 import { getPasswordResetTemplate } from '../utils/emailTemplate.js';
 import { LoginInput, SignupInput, UpdateMeInput } from '../models/zodUser.schema.js';
 
+
 /**
  * @desc    1. SIGNUP
  */

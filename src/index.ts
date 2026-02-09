@@ -1,88 +1,65 @@
-// import dns from 'node:dns';
-
-// // Force Node.js to use Google DNS for all resolutions
-// dns.setServers(['8.8.8.8', '8.8.4.4']);
-
 import express, { Application, NextFunction, Request, Response } from 'express';
-import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-// import mongoSanitize from 'express-mongo-sanitize';
-// import xss from 'xss-clean';
-
+import path from 'path';
 
 // Import your logic
 import authRoutes from './routes/authRoutes.js';
 import globalErrorHandler from './controllers/errorController.js';
 import AppError from './utils/appError.js';
-import connectDB from './config/db.js'; // Using the production standard DB function we created
+import connectDB from './config/db.js'; 
 import userMgtRoutes from './routes/userMgtRoutes.js';
 
-// 1. CONFIGURATION
-dotenv.config();
+// // 1. CONFIGURATION
+// dotenv.config();
+// This forces Node to look in the root directory regardless of where you run the command
+dotenv.config({ path: path.join(process.cwd(), '.env') });
+
 const app: Application = express();
 const PORT = process.env.PORT || 6199;
 
-// // 2. DATABASE CONNECTION
-mongoose
-connectDB();
+// 2. DATABASE CONNECTION
+connectDB(); // Cleaned: Removed the floating 'mongoose' word
 
-// 3. GLOBAL MIDDLEWARE or Strict Security Stack
-// Set security HTTP headers (Must be at the top)
+// 3. GLOBAL MIDDLEWARE
 app.use(helmet());
 
-// CORS configuration
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',  // Your React/Vite URL
-  credentials: true   // Allows the browser to send cookies to the server
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true 
 }));
 
-// Rate Limiting: General API protection
 const limiter = rateLimit({
-  max: 100, // 100 requests per IP
-  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 100,
+  windowMs: 60 * 60 * 1000,
   message: 'Too many requests from this IP, please try again in an hour!'
 });
 app.use('/api', limiter);
 
-// Optimized Parser or Body parser, reading data from body into req.body
 app.use(express.json({ limit: '10kb' }));
-
-// app.use(express.urlencoded({extended:true}))
 app.use(cookieParser());
 
 if (process.env.NODE_ENV === 'production') {
   app.set('trust proxy', 1);
 }
 
-/**
- * Advanced NoSQL Injection Protection
- * Recursively strips keys starting with '$' or containing '.' 
- * from req.body, req.query, and req.params.
- */
+// Advanced NoSQL Injection Protection
 app.use((req: Request, res: Response, next: NextFunction) => {
   const sanitize = (obj: any) => {
     if (obj && typeof obj === 'object') {
       Object.keys(obj).forEach((key) => {
-        // 1. Check if the key is dangerous
-        // We check for '$' at the start and '.' anywhere in the key
         if (key.startsWith('$') || key.includes('.')) {
           delete obj[key];
-        } 
-        // 2. If the value is another object/array, dig deeper
-        else if (obj[key] && typeof obj[key] === 'object') {
+        } else if (obj[key] && typeof obj[key] === 'object') {
           sanitize(obj[key]);
         }
       });
     }
   };
-
-  // Clean all three primary input sources
   [req.body, req.query, req.params].forEach(sanitize);
-
   next();
 });
 
@@ -90,24 +67,141 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/user-mgt', userMgtRoutes);
 
-// Health Check
 app.get('/', (req: Request, res: Response) => {
   res.status(200).json({ message: 'Vanguard API is running...' });
 });
 
-// 5.Catch-all for Express 5 ERROR HANDLING, 
-// Handle undefined routes Handle unhandled routes (404)
-app.all('/*splat', (req, res, next) => {
+// 5. Catch-all for Express 5
+// Using '/*path' is the most stable naming convention for Express 5
+app.all('/*path', (req: Request, res: Response, next: NextFunction) => {
   next(new AppError(`Route ${req.originalUrl} not found`, 404));
 });
 
-// Global error handler (MUST be at the bottom)
+// 6. GLOBAL ERROR HANDLER (MUST be last)
 app.use(globalErrorHandler);
 
-// 6. START SERVER
 app.listen(PORT, () => {
   console.log(`🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
 });
+
+
+
+
+
+
+
+
+
+// // import dns from 'node:dns';
+
+// // // Force Node.js to use Google DNS for all resolutions
+// // dns.setServers(['8.8.8.8', '8.8.4.4']);
+
+// import express, { Application, NextFunction, Request, Response } from 'express';
+// import mongoose from 'mongoose';
+// import dotenv from 'dotenv';
+// import cors from 'cors';
+// import cookieParser from 'cookie-parser';
+// import helmet from 'helmet';
+// import rateLimit from 'express-rate-limit';
+// // import mongoSanitize from 'express-mongo-sanitize';
+// // import xss from 'xss-clean';
+
+
+// // Import your logic
+// import authRoutes from './routes/authRoutes.js';
+// import globalErrorHandler from './controllers/errorController.js';
+// import AppError from './utils/appError.js';
+// import connectDB from './config/db.js'; // Using the production standard DB function we created
+// import userMgtRoutes from './routes/userMgtRoutes.js';
+
+// // 1. CONFIGURATION
+// dotenv.config();
+// const app: Application = express();
+// const PORT = process.env.PORT || 6199;
+
+// // // 2. DATABASE CONNECTION
+// mongoose
+// connectDB();
+
+// // 3. GLOBAL MIDDLEWARE or Strict Security Stack
+// // Set security HTTP headers (Must be at the top)
+// app.use(helmet());
+
+// // CORS configuration
+// app.use(cors({
+//   origin: process.env.FRONTEND_URL || 'http://localhost:5173',  // Your React/Vite URL
+//   credentials: true   // Allows the browser to send cookies to the server
+// }));
+
+// // Rate Limiting: General API protection
+// const limiter = rateLimit({
+//   max: 100, // 100 requests per IP
+//   windowMs: 60 * 60 * 1000, // 1 hour
+//   message: 'Too many requests from this IP, please try again in an hour!'
+// });
+// app.use('/api', limiter);
+
+// // Optimized Parser or Body parser, reading data from body into req.body
+// app.use(express.json({ limit: '10kb' }));
+
+// // app.use(express.urlencoded({extended:true}))
+// app.use(cookieParser());
+
+// if (process.env.NODE_ENV === 'production') {
+//   app.set('trust proxy', 1);
+// }
+
+// /**
+//  * Advanced NoSQL Injection Protection
+//  * Recursively strips keys starting with '$' or containing '.' 
+//  * from req.body, req.query, and req.params.
+//  */
+// app.use((req: Request, res: Response, next: NextFunction) => {
+//   const sanitize = (obj: any) => {
+//     if (obj && typeof obj === 'object') {
+//       Object.keys(obj).forEach((key) => {
+//         // 1. Check if the key is dangerous
+//         // We check for '$' at the start and '.' anywhere in the key
+//         if (key.startsWith('$') || key.includes('.')) {
+//           delete obj[key];
+//         } 
+//         // 2. If the value is another object/array, dig deeper
+//         else if (obj[key] && typeof obj[key] === 'object') {
+//           sanitize(obj[key]);
+//         }
+//       });
+//     }
+//   };
+
+//   // Clean all three primary input sources
+//   [req.body, req.query, req.params].forEach(sanitize);
+
+//   next();
+// });
+
+// // 4. ROUTES
+// app.use('/api/v1/auth', authRoutes);
+// app.use('/api/v1/user-mgt', userMgtRoutes);
+
+// // Health Check
+// app.get('/', (req: Request, res: Response) => {
+//   res.status(200).json({ message: 'Vanguard API is running...' });
+// });
+
+// // 5.Catch-all for Express 5 ERROR HANDLING, 
+// // Handle undefined routes Handle unhandled routes (404)
+// app.all('/*splat', (req, res, next) => {
+//   next(new AppError(`Route ${req.originalUrl} not found`, 404));
+// });
+
+// // Global error handler (MUST be at the bottom)
+// app.use(globalErrorHandler);
+
+// // 6. START SERVER
+// app.listen(PORT, () => {
+//   console.log(`🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+// });
 
 
 
