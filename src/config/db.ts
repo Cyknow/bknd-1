@@ -1,11 +1,13 @@
 import mongoose from "mongoose";
-import pc, { bold } from "picocolors";
+import pkg from "picocolors";
+
+const { bold } = pkg;
 
 const connectDB = async (): Promise<void> => {
   const mongoUrl = process.env.MONGO_URL;
 
   if (!mongoUrl) {
-    console.error(pc.red(bold("❌ ERROR: MONGO_URL is missing in .env")));
+    console.error(pkg.red(bold("❌ ERROR: MONGO_URL is missing in .env")));
     process.exit(1);
   }
 
@@ -21,21 +23,20 @@ const connectDB = async (): Promise<void> => {
     const conn = await mongoose.connect(mongoUrl, options);
     
     console.log(
-      pc.bgCyan(bold(` 🍃 MongoDB Connected: ${conn.connection.host} `))
-    );
+      pkg.bgCyan(bold(` 🍃 MongoDB Connected: ${conn.connection.host} `)));
 
     // 2. Monitoring Connection Events
     mongoose.connection.on("error", (err) => {
-      console.error(pc.red(`MongoDB runtime error: ${err}`));
+      console.error(pkg.red(`MongoDB runtime error: ${err}`));
     });
 
     mongoose.connection.on("disconnected", () => {
-      console.warn(pc.yellow("MongoDB disconnected. Attempting to reconnect..."));
+      console.warn(pkg.yellow("MongoDB disconnected. Attempting to reconnect..."));
     });
 
   } catch (error) {
     if (error instanceof Error) {
-      console.error(pc.blueBright(bold(` ❌ Connection Error: ${error.message} `)));
+      console.error(pkg.blueBright(bold(` ❌ Connection Error: ${error.message} `)));
     }
     process.exit(1);
   }
@@ -44,7 +45,7 @@ const connectDB = async (): Promise<void> => {
 // 3. Handle Graceful Shutdown (for SIGINT / SIGTERM)
 process.on("SIGINT", async () => {
   await mongoose.connection.close();
-  console.log(pc.magenta("MongoDB connection closed through app termination"));
+  console.log(pkg.magenta("MongoDB connection closed through app termination"));
   process.exit(0);
 });
 
@@ -55,7 +56,7 @@ export default connectDB;
 
 
 // import mongoose from "mongoose";
-// import pc from "pc";
+// import pkg from "pkg";
 
 // // Database connection function
 // const connectDB = async (): Promise<void> => {
@@ -64,7 +65,7 @@ export default connectDB;
 //       throw new Error("MONGO_URL is not defined in environment variables");
 //     }
 //     const connect = await mongoose.connect(process.env.MONGO_URL);
-//     console.log(pc.bgCyan (`MongoDB Connected: ${connect.connection.host}`));
+//     console.log(pkg.bgCyan (`MongoDB Connected: ${connect.connection.host}`));
 //   } catch (error) {
 //     console.error(error);
 //     process.exit(1);
