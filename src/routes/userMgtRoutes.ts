@@ -14,7 +14,7 @@ router.use(protect);
 // Only 'admin' and 'senior-admin' can access these
 router.use(restrictTo('admin', 'senior-admin'));
 
-router.route('/')
+router.route('/allUsers')
   .get(authController.getAllUsers);
 
 router.route('/:id')
