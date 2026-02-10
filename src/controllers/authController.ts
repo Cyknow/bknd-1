@@ -152,12 +152,12 @@ export const resetPassword = catchAsync(async (req: Request, res: Response, next
 export const updateMe = catchAsync(async (
   req: Request<{}, {}, UpdateMeInput>, 
   res: Response, 
-  // next: NextFunction
+  next: NextFunction
 ) => {
   // 1) Create error if user POSTs password data
-  // if (req.body.password) {
-  //   return next(new AppError('This route is not for password updates. Please use /updateMyPassword.', 400));
-  // }
+  if ('password' in req.body) {
+    return next(new AppError('This route is not for password updates. Please use /updateMyPassword.', 400));
+  }
 
   // 1) req.body is already filtered by Zod .strict(), so no need to manual filter!
   
