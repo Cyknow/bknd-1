@@ -2,7 +2,7 @@ import { Request, Response,
   NextFunction 
 } from 'express';
 import crypto from 'crypto';
-import User from '../models/User.js';
+import User, { IUser } from '../models/User.js';
 import { createSendToken } from '../utils/authUtils.js';
 import sendEmail from '../utils/email.js';
 import catchAsync from '../utils/catchAsync.js'; // Ensure path is correct
@@ -167,11 +167,25 @@ export const updateMe = catchAsync(async (
   //   if (req.body[el]) filteredBody[el] = req.body[el];
   // });
 
+// Only allow updating name and email
+const filteredBody = {
+  name: req.body.name,
+  email: req.body.email,
+  phone: req.body.phone
+};
+
   // 3) Update user document
-  const updatedUser = await User.findByIdAndUpdate(req.user.id, req.body, {
+  const updatedUser = await User.findByIdAndUpdate((req.user as IUser)._id, filteredBody, {
     new: true,
     runValidators: true,
   });
+
+if (!updatedUser) {
+  return res.status(404).json({
+    status: 'fail',
+    message: 'No user found with that ID'
+  });
+}
 
   res.status(200).json({
     status: 'success',
