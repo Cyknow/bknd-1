@@ -1,10 +1,15 @@
+
+//to resolve the issue of missing env variables when running the server, we need to ensure that the .env file is properly loaded at the very beginning of our application. This is crucial because other modules might rely on these environment variables during their initialization. By importing 'dotenv/config' at the top of our index.ts file, we ensure that all environment variables are available throughout the entire application lifecycle.
+import 'dotenv/config';
+console.log('API KEY CHECK:', process.env.SENDGRID_API_KEY ? 'LOADED ✅' : 'MISSING ❌');
+
 import express, { Application, NextFunction, Request, Response } from 'express';
-import dotenv from 'dotenv';
+// import dotenv from 'dotenv';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import path from 'path';
+// import path from 'path';
 
 // Import your logic
 import authRoutes from './routes/authRoutes.js';
@@ -16,7 +21,7 @@ import userMgtRoutes from './routes/userMgtRoutes.js';
 // // 1. CONFIGURATION
 // dotenv.config();
 // This forces Node to look in the root directory regardless of where you run the command
-dotenv.config({ path: path.join(process.cwd(), '.env') });
+// dotenv.config({ path: path.join(process.cwd(), '.env') });
 
 const app: Application = express();
 const PORT = process.env.PORT || 6199;
