@@ -9,6 +9,11 @@ export interface IUser extends Document {
   password: string;
   phone?: string;
   role: 'regularUser' | 'admin' | 'senior-admin';
+  isVerified: boolean;
+  // emailVerificationToken: string,
+  emailVerificationToken?: string;
+  // ✅ Add the method signature here
+  createEmailVerificationToken(): string;
   mustChangePassword: boolean;
   passwordResetToken?: string;
   passwordResetExpires?: Date;
@@ -48,6 +53,12 @@ const userSchema = new Schema<IUser>({
     type: Boolean,
     default: false
   },
+  // For email verification (optional, but recommended)
+  isVerified: {
+    type: Boolean,
+    default: false,
+  },
+  emailVerificationToken: String,
   passwordResetToken: String,
   passwordResetExpires: Date,
   passwordChangedAt: Date,
@@ -56,6 +67,30 @@ const userSchema = new Schema<IUser>({
   toJSON: { virtuals: true },
   toObject: { virtuals: true }
 });
+
+// Method to create the verification token (similar to forgot password)
+userSchema.methods.createEmailVerificationToken = function(): string {
+  const verificationToken = crypto.randomBytes(32).toString('hex');
+
+  // We hash it to store in the DB for security
+  this.emailVerificationToken = crypto
+    .createHash('sha256')
+    .update(verificationToken)
+    .digest('hex');
+
+  return verificationToken; // Return the unhashed token to send via email
+};
+
+// userSchema.methods.createEmailVerificationToken = function() {
+//   const verificationToken = crypto.randomBytes(32).toString('hex');
+
+//   this.emailVerificationToken = crypto
+//     .createHash('sha256')
+//     .update(verificationToken)
+//     .digest('hex');
+
+//   return verificationToken;
+// };
 
 // 2. MIDDLEWARE: Password Hashing
 userSchema.pre<IUser>('save', async function() {

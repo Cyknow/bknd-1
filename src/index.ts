@@ -42,10 +42,11 @@ const limiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   message: 'Too many requests from this IP, please try again in an hour!'
 });
+
 app.use('/api', limiter);
 
-app.use(express.json({ limit: '10kb' }));
-app.use(cookieParser());
+// app.use(express.json({ limit: '10kb' }));
+// app.use(cookieParser());
 
 if (process.env.NODE_ENV === 'production') {
   app.set('trust proxy', 1);
@@ -68,18 +69,22 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
+// ✅ This MUST come before your routes
+app.use(express.json({ limit: '10kb' }));
+app.use(cookieParser());
+
 // 4. ROUTES
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/user-mgt', userMgtRoutes);
 
 app.get('/', (req: Request, res: Response) => {
-  res.status(200).json({ message: 'Vanguard API is running...' });
+  res.status(200).json({ message: 'WCC APIs is running...' });
 });
 
 // 5. Catch-all for Express 5
 // Using '/*path' is the most stable naming convention for Express 5
 app.all('/*path', (req: Request, res: Response, next: NextFunction) => {
-  next(new AppError(`Route ${req.originalUrl} not found`, 404));
+  next(new AppError('Access restricted or endpoint does not exist.', 404));
 });
 
 // 6. GLOBAL ERROR HANDLER (MUST be last)

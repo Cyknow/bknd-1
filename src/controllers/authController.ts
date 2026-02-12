@@ -9,6 +9,8 @@ import catchAsync from '../utils/catchAsync.js'; // Ensure path is correct
 import AppError from '../utils/appError.js';   // Ensure path is correct
 import { getPasswordResetTemplate } from '../utils/emailTemplate.js';
 import { LoginInput, SignupInput, UpdateMeInput } from '../models/zodUser.schema.js';
+import sendMail from '../utils/email.js';
+import { getWelcomeTemplate } from '../utils/welcomeEmail.js';
 
 
 /**
@@ -22,6 +24,42 @@ export const signup = catchAsync(async (
   // No need for "if (!req.body.name)" anymore. Zod guaranteed it exists.
   // Zod already stripped unwanted fields and validated requirements
   const newUser = await User.create(req.body);
+
+  // 2. WIRING: Send the Welcome Email
+
+  // 1. Generate Verification Token
+  const verifyToken = newUser.createEmailVerificationToken();
+  await newUser.save({ validateBeforeSave: false });
+
+  // 2. Create the URL
+  const verifyURL = `${req.protocol}://${req.get('host')}/api/v1/auth/verify-email/${verifyToken}`;
+
+  // 3. Send Email
+  try {
+    await sendMail({
+      email: newUser.email,
+      subject: 'Verify your WCC Account ✅',
+      message: `Welcome! Please verify your email: ${verifyURL}`,
+      html: getWelcomeTemplate(newUser.name, verifyURL),
+    });
+  } catch (err) {
+    console.error('Email failed');
+  }
+
+  // // We wrap this in a separate try/catch so a SendGrid error doesn't 
+  // // stop the user from logging in.
+  // try {
+  //   await sendMail({
+  //     email: newUser.email,
+  //     subject: 'Welcome to Weren-Care Charity! 🎉',
+  //     message: `Hi ${newUser.name}, welcome to WCC Nigeria!`,
+  //     html: getWelcomeTemplate(newUser.name),
+  //   });
+  // } catch (emailErr) {
+  //   // We log the error but don't stop the process
+  //   console.error('Email failed to send, but user was created successfully:', emailErr);
+  // }
+
   createSendToken(newUser, 201, res);
 });
 // const newUser = await User.create({
@@ -65,18 +103,44 @@ export const login = catchAsync(async (
   createSendToken(user, 200, res);
 });
 
+export const verifyEmail = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  // 1. Hash the token from the URL
+  const token = req.params.token as string
+  const hashedToken = crypto
+    .createHash('sha256')
+    .update(token)
+    .digest('hex');
+
+  // 2. Find user with this token
+  const user = await User.findOne({ emailVerificationToken: hashedToken });
+
+  if (!user) {
+    return next(new AppError('Token is invalid or has expired', 400));
+  }
+
+  // 3. Update user status
+  user.isVerified = true;
+  user.emailVerificationToken = undefined;
+  await user.save({ validateBeforeSave: false });
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Email verified successfully! Kudos... you can now use all features.'
+  });
+});
+
 /**
  * @desc    3. LOGOUT
  */
 export const logout = (
-  // req: Request, 
+  req: Request, 
   res: Response
 ) => {
   res.cookie('jwt', 'loggedout', {
-    expires: new Date(Date.now() + 10 * 1000),
+    expires: new Date(Date.now() + 10 * 1000),  // Expires in 10 seconds
     httpOnly: true,
   });
-  res.status(200).json({ status: 'success' });
+  res.status(200).json({ status: 'success! please come back, we will miss you' });
 };
 
 /**
