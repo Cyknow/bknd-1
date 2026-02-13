@@ -24,6 +24,8 @@ import userMgtRoutes from './routes/userMgtRoutes.js';
 // dotenv.config({ path: path.join(process.cwd(), '.env') });
 
 const app: Application = express();
+// 🛡️ HIDDEN VANGUARD PROTOCOL: Remove the "Express" fingerprint
+app.disable('x-powered-by');
 const PORT = process.env.PORT || 6199;
 
 // 2. DATABASE CONNECTION

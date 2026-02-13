@@ -104,29 +104,111 @@ export const login = catchAsync(async (
 });
 
 export const verifyEmail = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  // 1. Hash the token from the URL
-  const token = req.params.token as string
+  // 1. Get and hash the token from the URL
+  const token = req.params.token as string;
   const hashedToken = crypto
     .createHash('sha256')
     .update(token)
     .digest('hex');
 
-  // 2. Find user with this token
+  // 2. Grab the frontend base URL from .env
+  const frontendURL = process.env.FRONTEND_URL;
+
+  // 3. Find user with this token
   const user = await User.findOne({ emailVerificationToken: hashedToken });
 
+  // 4. CASE: Invalid or Expired Token
   if (!user) {
-    return next(new AppError('Token is invalid or has expired', 400));
+    return res.redirect(`${frontendURL}/verify-issue`);
   }
 
-  // 3. Update user status
+  // 5. CASE: User is already verified (Prevents redundant DB writes)
+  if (user.isVerified) {
+    return res.redirect(`${frontendURL}/signinp?status=already_active`);
+  }
+
+  // 6. Success: Update user status
   user.isVerified = true;
-  user.emailVerificationToken = undefined;
+  user.emailVerificationToken = undefined; 
   await user.save({ validateBeforeSave: false });
 
-  res.status(200).json({
-    status: 'success',
-    message: 'Email verified successfully! Kudos... you can now use all features.'
-  });
+  // 7. Redirect to Success Page
+  res.redirect(`${frontendURL}/verify-success`);
+});
+
+
+// export const verifyEmail = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+//   // 1. Hash the token from the URL
+//   const token = req.params.token as string
+//   const hashedToken = crypto
+//     .createHash('sha256')
+//     .update(token)
+//     .digest('hex');
+
+//   // 2. Find user with this token
+//   const user = await User.findOne({ emailVerificationToken: hashedToken });
+
+//   if (!user) {
+//     return next(new AppError('Invalid OTP or has expired', 400));
+//   }
+
+//   // 3. Update user status
+//   user.isVerified = true;
+//   user.emailVerificationToken = undefined;
+//   await user.save({ validateBeforeSave: false });
+
+//   res.status(200).json({
+//     status: 'success',
+//     message: 'Email verified successfully! Kudos... you can now use all features.'
+//   });
+// });
+
+/**
+ * @desc    Resend Email Verification Link
+ */
+export const resendVerification = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const { email } = req.body;
+
+  // 1. Find the user
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    return next(new AppError('No user found with that email address.', 404));
+  }
+
+  // 2. Check if already verified
+  if (user.isVerified) {
+    return next(new AppError('This account is already verified. Please log in.', 400));
+  }
+
+  // 3. Generate new verification token
+  const verifyToken = user.createEmailVerificationToken();
+  
+  // Save changes (disable validation to ignore password requirements)
+  await user.save({ validateBeforeSave: false });
+
+  // 4. Create URL and Send Email
+  const verifyURL = `${req.protocol}://${req.get('host')}/api/v1/auth/verify-email/${verifyToken}`;
+
+  try {
+    await sendMail({
+      email: user.email,
+      subject: 'New Verification Link - Weren-Care Charity ✅',
+      message: `Your new verification link: ${verifyURL}`,
+      html: getWelcomeTemplate(user.name, verifyURL),
+    });
+
+    res.status(200).json({
+      status: 'success',
+      message: 'A fresh verification link has been sent to your email.'
+    });
+  } catch (err) {
+    // If email fails, clear the token so user can try again
+    user.emailVerificationToken = undefined;
+    await user.save({ validateBeforeSave: false });
+    
+    return next(new AppError('There was an error sending the email. Try again later.', 500));
+  }
 });
 
 /**
