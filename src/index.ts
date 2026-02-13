@@ -39,6 +39,14 @@ app.use(cors({
   credentials: true 
 }));
 
+// app.use(cors({
+//   origin: [
+//     'http://localhost:5173', // Local development
+//     'https://your-frontend-domain.com' // ✅ ADD YOUR DEPLOYED FRONTEND URL HERE
+//   ],
+//   credentials: true
+// }));
+
 const limiter = rateLimit({
   max: 100,
   windowMs: 60 * 60 * 1000,
@@ -76,8 +84,8 @@ app.use(express.json({ limit: '10kb' }));
 app.use(cookieParser());
 
 // 4. ROUTES
-app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/user-mgt', userMgtRoutes);
+app.use('/auth', authRoutes);
+app.use('/user-mgt', userMgtRoutes);
 
 app.get('/', (req: Request, res: Response) => {
   res.status(200).json({ message: 'WCC APIs is running...' });
