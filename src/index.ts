@@ -24,6 +24,11 @@ import userMgtRoutes from './routes/userMgtRoutes.js';
 // dotenv.config({ path: path.join(process.cwd(), '.env') });
 
 const app: Application = express();
+
+// ✅ Add this line! 
+// '1' tells Express to trust the first hop (Render's proxy)
+app.set('trust proxy', 1);
+
 // 🛡️ HIDDEN VANGUARD PROTOCOL: Remove the "Express" fingerprint
 app.disable('x-powered-by');
 const PORT = process.env.PORT || 6199;
@@ -52,6 +57,12 @@ const limiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   message: 'Too many requests from this IP, please try again in an hour!'
 });
+// const limiter = rateLimit({
+//   windowMs: 15 * 60 * 1000,
+//   max: 100,
+//   // ✅ Disable the specific check causing the crash
+//   validate: { xForwardedForHeader: false }, 
+// });
 
 app.use('/api', limiter);
 
