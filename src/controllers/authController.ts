@@ -32,7 +32,7 @@ export const signup = catchAsync(async (
   await newUser.save({ validateBeforeSave: false });
 
   // 2. Create the URL
-  const verifyURL = `${req.protocol}://${req.get('host')}/api/v1/auth/verify-email/${verifyToken}`;
+  const verifyURL = `${req.protocol}://${req.get('host')}/auth/verify-email/${verifyToken}`;
 
   // 3. Send Email
   try {
@@ -193,7 +193,7 @@ export const resendVerification = catchAsync(async (req: Request, res: Response,
   await user.save({ validateBeforeSave: false });
 
   // 4. Create URL and Send Email
-  const verifyURL = `${req.protocol}://${req.get('host')}/api/v1/auth/verify-email/${verifyToken}`;
+  const verifyURL = `${req.protocol}://${req.get('host')}/auth/verify-email/${verifyToken}`;
 
   try {
     await sendMail({
