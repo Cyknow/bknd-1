@@ -9,9 +9,9 @@ const router = express.Router();
 
 // Public Routes
 router.post('/signup', validate(SignupSchema), authController.signup);
-router.get('/verify-email/:token', authController.verifyEmail);
+router.get('/verifyemail/:token', authController.verifyEmail);
 // ✅ Add the resend route
-router.post('/resend-verification', authController.resendVerification);
+router.post('/resendverification', authController.resendVerification);
 router.post('/login', validate(LoginSchema), authController.login);
 router.get('/logout', authController.logout);
 //there should be a userupdate route here but we will put it in userMgtRoutes since only admins can update users for now. We can always add a /updateMe route here later for users to update their own profiles without admin permissions.

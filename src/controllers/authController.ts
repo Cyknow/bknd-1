@@ -32,7 +32,7 @@ export const signup = catchAsync(async (
   await newUser.save({ validateBeforeSave: false });
 
   // 2. Create the URL
-  const verifyURL = `${req.protocol}://${req.get('host')}/auth/verify-email/${verifyToken}`;
+  const verifyURL = `${req.protocol}://${req.get('host')}/auth/verifyemail/${verifyToken}`;
 
   // 3. Send Email
   try {
