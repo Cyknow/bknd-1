@@ -24,6 +24,13 @@ const sendMail = async (options: EmailOptions) => {
     subject: options.subject,
     text: options.message,
     html: options.html || `<div>${options.message}</div>`,
+    // ✅ This forces click tracking OFF for this specific email send
+  trackingSettings: {
+    clickTracking: {
+      enable: false,
+      enableText: false,
+    },
+  },
   };
 
   try {

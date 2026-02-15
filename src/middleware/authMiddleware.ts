@@ -34,6 +34,10 @@ export const protect = catchAsync(async (req: any, res: Response, next: NextFunc
     return next(new AppError('User recently changed password! Please log in again.', 401));
   }
 
+  if (!req.user.isVerified) {
+    return next(new AppError('You must verify your email to access this feature.', 403));
+  }
+
   // GRANT ACCESS TO PROTECTED ROUTE
   req.user = currentUser;
   next();

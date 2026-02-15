@@ -79,15 +79,20 @@ export const login = catchAsync(async (
 ) => {
   const { email, password } = req.body; // TS knows these are strings
 
-  // if (!email || !password) {
-  //   return next(new AppError('Please provide email and password', 400));
-  // }
+  if (!email || !password) {
+    return next(new AppError('Please provide email and password', 400));
+  }
 
   // 1) Check if user exists & password is correct
   const user = await User.findOne({ email }).select('+password');
 
   if (!user || !(await user.correctPassword(password, user.password))) {
     return next(new AppError('Incorrect email or password', 401));
+  }
+
+  // ✅ THE CHECK: Ensure email is verified
+  if (!user.isVerified) {
+    return next(new AppError('Please verify your email address before logging in.', 401));
   }
 
     // Inside your login function in authController.ts

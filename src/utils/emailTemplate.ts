@@ -80,19 +80,19 @@ export const getPasswordResetTemplate = (userName: string, resetURL: string) => 
 
         <div class="social-container">
           <span class="social-label">Connect with us</span>
-          <a href="${socialLinks.facebook}" class="social-icon">
+          <a clicktracking="off" href="${socialLinks.facebook}" class="social-icon">
             <img src="${icons.fb}" alt="FB" width="28" height="28">
           </a>
-          <a href="${socialLinks.twitter}" class="social-icon">
+          <a clicktracking="off" href="${socialLinks.twitter}" class="social-icon">
             <img src="${icons.tw}" alt="TW" width="28" height="28">
           </a>
-          <a href="${socialLinks.instagram}" class="social-icon">
+          <a clicktracking="off" href="${socialLinks.instagram}" class="social-icon">
             <img src="${icons.ig}" alt="IG" width="28" height="28">
           </a>
-          <a href="${socialLinks.whatsapp}" class="social-icon">
+          <a clicktracking="off" href="${socialLinks.whatsapp}" class="social-icon">
             <img src="${icons.wa}" alt="WA" width="28" height="28">
           </a>
-          <a href="${socialLinks.telegram}" class="social-icon">
+          <a clicktracking="off" href="${socialLinks.telegram}" class="social-icon">
             <img src="${icons.tg}" alt="TG" width="28" height="28">
           </a>
         </div>

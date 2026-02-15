@@ -36,7 +36,7 @@ export const getWelcomeTemplate = (userName: string, verifyURL: string) => {
           <p>Please verify your email address to activate your WCC account so you can log in to explore our projects, contribute to solutions, and stay updated with our impact across the World.</p>
           <p>.</p>
         <div style="text-align: center; margin: 30px 0;">
-        <a href="${verifyURL}" style="background-color: #10b981; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">Verify My Email</a>
+        <a clicktracking="off" href="${verifyURL}" style="background-color: #10b981; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">Verify My Email</a>
           </div>
         <div class="footer">
           <p>&copy; ${new Date().getFullYear()} Weren-Care Charity. Follow us on our socials below.</p>
