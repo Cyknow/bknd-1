@@ -11,6 +11,9 @@
     "rootDir": "./src",
     "sourceMap": true,
     "removeComments": true,
+
+    /* 1. Add this to fix the "process" error */
+    "types": ["node"],
     
     /* Strictness - The Lock */
     "strict": true,
@@ -30,86 +33,3 @@
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }
-
-
-
-
-
-
-
-
-// {
-//   "compilerOptions": {
-//     "skipLibCheck": true,
-//     "module": "NodeNext",
-//     "moduleResolution": "NodeNext",
-//     "baseUrl": "./src",
-//     "paths": {
-//       "*": ["*", "src/*"]
-//     },
-//     "outDir": "./dist",
-//     "sourceMap": true,
-//     "noImplicitAny": true,
-//     "esModuleInterop": true,
-//     "resolveJsonModule": true,
-//     "strict": true,
-//     "typeRoots": ["./node_modules/@types"]
-//   },
-//   "include": [
-//     "src/**/*", 
-//     "typings.d.ts"
-//   ]
-// }
-
-
-// {
-//   "compilerOptions": {
-//     /* Base Options */
-//     "target": "ES2022",
-//     "module": "NodeNext",
-//     "moduleResolution": "NodeNext",
-//     "outDir": "./dist",
-//     "rootDir": "./src",
-//     "sourceMap": true,
-//     "removeComments": true,
-    
-//     /* Strictness - The "Lock" */
-//     "strict": true,                    // Enables all strict type-checking options
-//     "noImplicitAny": true,             // Error on expressions and declarations with an implied 'any' type
-//     "strictNullChecks": true,          // Ensures you handle null/undefined explicitly
-//     "noUnusedLocals": true,            // Report errors on unused local variables
-//     "noUnusedParameters": true,        // Report errors on unused parameters
-//     "noImplicitReturns": true,         // Ensure all code paths in a function return a value
-//     "noFallthroughCasesInSwitch": true, // Prevent switch-case bugs
-    
-//     /* Compatibility */
-//     "esModuleInterop": true,           // Ensures compatibility with CommonJS modules
-//     "forceConsistentCasingInFileNames": true,
-//     "skipLibCheck": true               // Speeds up build by skipping type checking of declaration files
-//   },
-//   "include": ["src/**/*"],
-//   "exclude": ["node_modules", "**/*.test.ts"]
-// }
-
-
-
-
-
-
-
-
-
-// {
-//   "compilerOptions": {
-//     "module": "NodeNext",
-//     "baseUrl": "src",
-//     "outDir": "dist",
-//     "sourceMap": true,
-//     "noImplicitAny": true,
-//     "esModuleInterop": true,
-//     "moduleResolution": "NodeNext",
-//     "resolveJsonModule": true,
-//     "strict": true
-//   },
-//     "include": ["src/**/*", "src/index.ts", "typings.d.ts", "tsconfig.json"]
-// }
