@@ -40,7 +40,7 @@ connectDB(); // Cleaned: Removed the floating 'mongoose' word
 app.use(helmet());
 
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: process.env.FRONTEND_URL || 'wccnigeria.vercel.app', // Your React/Vite URL
   credentials: true 
 }));
 
