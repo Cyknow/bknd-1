@@ -13,8 +13,8 @@
     "removeComments": true,
 
     /* 1. Add this to fix the "process" error */
-    "types": ["node"],
-    "typeRoots": ["./node_modules/@types"],
+    // "types": ["node"],
+    // "typeRoots": ["./node_modules/@types"],
     
     /* Strictness - The Lock */
     "strict": true,
