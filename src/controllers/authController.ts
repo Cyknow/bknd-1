@@ -33,7 +33,14 @@ export const signup = catchAsync(async (
   await newUser.save({ validateBeforeSave: false });
 
   // 2. Create the URL
-  const verifyURL = `${req.protocol}://${req.get('host')}/auth/verifyemail/${verifyToken}`;
+  // const verifyURL = `${req.protocol}://${req.get('host')}/auth/verifyemail/${verifyToken}`;
+    const baseURL =
+  process.env.NODE_ENV === 'production'
+    ? process.env.API_BASE_URL
+    : `${req.protocol}://${req.get('host')}`;
+
+    const verifyURL = `${baseURL}/auth/verifyemail/${verifyToken}`;
+
 
   // 3. Send Email
   try {
