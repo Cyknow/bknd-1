@@ -14,6 +14,7 @@ export interface IUser extends Document {
   emailVerificationToken?: string;
   // ✅ Add the method signature here
   createEmailVerificationToken(): string;
+  emailVerificationExpires: Date;
   mustChangePassword: boolean;
   passwordResetToken?: string;
   passwordResetExpires?: Date;
@@ -59,6 +60,7 @@ const userSchema = new Schema<IUser>({
     default: false,
   },
   emailVerificationToken: String,
+  emailVerificationExpires: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
   passwordChangedAt: Date,
@@ -77,6 +79,8 @@ userSchema.methods.createEmailVerificationToken = function(): string {
     .createHash('sha256')
     .update(verificationToken)
     .digest('hex');
+
+    this.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
 
   return verificationToken; // Return the unhashed token to send via email
 };

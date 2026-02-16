@@ -23,7 +23,8 @@ export const signup = catchAsync(async (
 ) => {
   // No need for "if (!req.body.name)" anymore. Zod guaranteed it exists.
   // Zod already stripped unwanted fields and validated requirements
-  const newUser = await User.create(req.body);
+  // const newUser = await User.create(req.body);
+  const newUser = new User(req.body);
 
   // 2. WIRING: Send the Welcome Email
 
@@ -120,7 +121,10 @@ export const verifyEmail = catchAsync(async (req: Request, res: Response, next: 
   const frontendURL = process.env.FRONTEND_URL;
 
   // 3. Find user with this token
-  const user = await User.findOne({ emailVerificationToken: hashedToken });
+  const user = await User.findOne({ 
+    emailVerificationToken: hashedToken,
+    emailVerificationExpires: { $gt: Date.now() }
+  });
 
   // 4. CASE: Invalid or Expired Token
   if (!user) {
@@ -193,7 +197,7 @@ export const resendVerification = catchAsync(async (req: Request, res: Response,
   await user.save({ validateBeforeSave: false });
 
   // 4. Create URL and Send Email
-  const verifyURL = `${req.protocol}://${req.get('host')}/auth/verify-email/${verifyToken}`;
+  const verifyURL = `${req.protocol}://${req.get('host')}/auth/verifyemail/${verifyToken}`;
 
   try {
     await sendMail({
