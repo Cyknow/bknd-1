@@ -3,20 +3,20 @@
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+
+    "rootDir": "./src",
+    "outDir": "./dist",
+
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
     },
-    "outDir": "./dist",
-    "rootDir": "./src",
+
+    "types": ["node"],
+
     "sourceMap": true,
     "removeComments": true,
 
-    /* 1. Add this to fix the "process" error */
-    // "types": ["node"],
-    // "typeRoots": ["./node_modules/@types"],
-    
-    /* Strictness - The Lock */
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
@@ -24,14 +24,57 @@
     "noUnusedLocals": true,
     "noUnusedParameters": false,
     "noImplicitReturns": true,
-    
-    /* Compatibility */
+
     "esModuleInterop": true,
-    "skipLibCheck": true,
-    "skipDefaultLibCheck": true,
     "resolveJsonModule": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+
+    "skipLibCheck": true
   },
-  "include": ["src/**/*"],
+  "include": ["src"],
   "exclude": ["node_modules", "dist"]
 }
+
+
+
+
+
+
+
+// {
+//   "compilerOptions": {
+//     "target": "ES2022",
+//     "module": "NodeNext",
+//     "moduleResolution": "NodeNext",
+//     "baseUrl": ".",
+//     "paths": {
+//       "@/*": ["src/*"]
+//     },
+//     "outDir": "./dist",
+//     "rootDir": "./src",
+//     "sourceMap": true,
+//     "removeComments": true,
+
+//     /* 1. Add this to fix the "process" error */
+//     // "types": ["node"],
+//     // "typeRoots": ["./node_modules/@types"],
+    
+//     /* Strictness - The Lock */
+//     "strict": true,
+//     "noImplicitAny": true,
+//     "strictNullChecks": true,
+//     "strictFunctionTypes": true,
+//     "noUnusedLocals": true,
+//     "noUnusedParameters": false,
+//     "noImplicitReturns": true,
+    
+//     /* Compatibility */
+//     "esModuleInterop": true,
+//     "skipLibCheck": true,
+//     "skipDefaultLibCheck": true,
+//     "resolveJsonModule": true,
+//     "forceConsistentCasingInFileNames": true
+//   },
+//   "include": ["src/**/*"],
+//   "exclude": ["node_modules", "dist"]
+// }
