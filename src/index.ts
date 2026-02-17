@@ -108,6 +108,14 @@ app.get('/', (req: Request, res: Response) => {
   res.status(200).json({ message: 'WCC APIs is running...' });
 });
 
+const requiredEnv = ["VITE_API_URL", "FRONTEND_URL"];
+
+requiredEnv.forEach((key) => {
+  if (!process.env[key]) {
+    throw new Error(`❌ Missing required env variable: ${key}`);
+  }
+});
+
 // 5. Catch-all for Express 5
 // Using '/*path' is the most stable naming convention for Express 5
 app.use((req: Request, res: Response, next: NextFunction) => {

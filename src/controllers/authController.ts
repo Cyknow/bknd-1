@@ -34,12 +34,15 @@ export const signup = catchAsync(async (
 
   // 2. Create the URL
   // const verifyURL = `${req.protocol}://${req.get('host')}/auth/verifyemail/${verifyToken}`;
-    const baseURL =
-  process.env.NODE_ENV === 'production'
-    ? process.env.API_BASE_URL
-    : `${req.protocol}://${req.get('host')}`;
+  
+  //Production code should never rely on NODE_ENV branching for URLs.
+  //   const baseURL =
+  // process.env.NODE_ENV === 'production'
+  //   ? process.env.API_BASE_URL
+  //   : `${req.protocol}://${req.get('host')}`;
+  //   const verifyURL = `${baseURL}/auth/verifyemail/${verifyToken}`;
 
-    const verifyURL = `${baseURL}/auth/verifyemail/${verifyToken}`;
+  const verifyURL = `${process.env.VITE_API_URL}/auth/verifyemail/${verifyToken}`;
 
 
   // 3. Send Email
@@ -149,7 +152,8 @@ export const verifyEmail = catchAsync(async (req: Request, res: Response, next: 
   await user.save({ validateBeforeSave: false });
 
   // 7. Redirect to Success Page
-  res.redirect(`${frontendURL}/verify-success`);
+  res.redirect(
+    `${frontendURL}/verify-success`);
 });
 
 
@@ -204,7 +208,9 @@ export const resendVerification = catchAsync(async (req: Request, res: Response,
   await user.save({ validateBeforeSave: false });
 
   // 4. Create URL and Send Email
-  const verifyURL = `${req.protocol}://${req.get('host')}/auth/verifyemail/${verifyToken}`;
+  // const verifyURL = `${req.protocol}://${req.get('host')}/auth/verifyemail/${verifyToken}`;
+const verifyURL = `${process.env.VITE_API_URL}/auth/verifyemail/${verifyToken}`;
+
 
   try {
     await sendMail({
