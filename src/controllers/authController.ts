@@ -75,7 +75,14 @@ export const signup = catchAsync(async (
   //   console.error('Email failed to send, but user was created successfully:', emailErr);
   // }
 
-  createSendToken(newUser, 201, res);
+  // createSendToken(newUser, 201, res);
+  
+  // DO NOT call createSendToken(newUser, 201, res) here!
+  // Instead, send a plain response:
+  res.status(201).json({
+    status: 'success',
+    message: 'Account created! Please check your email to verify your account before logging in.'
+  });
 });
 // const newUser = await User.create({
 //     name: req.body.name,
