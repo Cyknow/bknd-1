@@ -129,7 +129,7 @@ requiredEnv.forEach((key) => {
 // 5. Catch-all for Express 5
 // Using '/*path' is the most stable naming convention for Express 5
 app.use((req: Request, res: Response, next: NextFunction) => {
-  next(new AppError('Access restricted or endpoint does not exist.', 404));
+  next(new AppError('Unauthirized, kindly contact support at ~ctsnlgroup@gmail.com~ for proper guild', 404));
 });
 // app.all('/*path', (req: Request, res: Response, next: NextFunction) => {
 //   next(new AppError('Access restricted or endpoint does not exist.', 404));
