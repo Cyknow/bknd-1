@@ -45,10 +45,20 @@ connectDB(); // Cleaned: Removed the floating 'mongoose' word
 // 3. GLOBAL MIDDLEWARE
 app.use(helmet());
 
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'wccnigeria.vercel.app', // Your React/Vite URL
-  credentials: true 
-}));
+// app.use(cors({
+//   origin: process.env.FRONTEND_URL || 'wccnigeria.vercel.app', // Your React/Vite URL
+//   credentials: true 
+// }));
+
+app.use(
+  cors({
+    origin: "https://wccnigeria.vercel.app",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+  })
+);
+
 
 // app.use(cors({
 //   origin: [

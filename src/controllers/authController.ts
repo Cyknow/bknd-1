@@ -13,6 +13,10 @@ import sendMail from '../utils/email.js';
 import { getWelcomeTemplate } from '../utils/welcomeEmail.js';
 
 
+//remember to iplement Role-based route guards
+// Persisted user cache
+// Refresh-token rotation
+
 /**
  * @desc    1. SIGNUP
  */
@@ -81,14 +85,14 @@ export const signup = catchAsync(async (
 //   });
 
 /**
- * @desc    2. LOGIN
+ * @desc Login user
  */
 export const login = catchAsync(async (
-  req: Request<{}, {}, LoginInput>, //typed body!
-  res: Response, 
+  req: Request<{}, {}, LoginInput>,
+  res: Response,
   next: NextFunction
 ) => {
-  const { email, password } = req.body; // TS knows these are strings
+  const { email, password } = req.body;
 
   if (!email || !password) {
     return next(new AppError('Please provide email and password', 400));
@@ -101,23 +105,79 @@ export const login = catchAsync(async (
     return next(new AppError('Incorrect email or password', 401));
   }
 
-  // ✅ THE CHECK: Ensure email is verified
+  // 2) Ensure email is verified
   if (!user.isVerified) {
-    return next(new AppError('Please verify your email address before logging in.', 401));
+    return next(
+      new AppError('Please verify your email address before logging in.', 401)
+    );
   }
 
-    // Inside your login function in authController.ts
+  // 3) Force password change flow
   if (user.mustChangePassword) {
+    const resetToken = user.createPasswordResetToken();
+    await user.save({ validateBeforeSave: false });
+
     return res.status(200).json({
       status: 'force-reset',
       message: `Dear ${user.name}, kindly change your password to login.`,
-      resetToken: user.createPasswordResetToken() // Optionally generate a token immediately
+      resetToken
     });
   }
 
-  // 2) Send token
+  // 4) SUCCESS → issue token ONCE
   createSendToken(user, 200, res);
 });
+
+
+// /**
+//  * @desc    2. LOGIN
+//  */
+// export const login = catchAsync(async (
+//   req: Request<{}, {}, LoginInput>, //typed body!
+//   res: Response, 
+//   next: NextFunction
+// ) => {
+//   const { email, password } = req.body; // TS knows these are strings
+
+//   if (!email || !password) {
+//     return next(new AppError('Please provide email and password', 400));
+//   }
+
+//   // 1) Check if user exists & password is correct
+//   const user = await User.findOne({ email }).select('+password');
+
+//   if (!user || !(await user.correctPassword(password, user.password))) {
+//     return next(new AppError('Incorrect email or password', 401));
+//   }
+
+//   // ✅ THE CHECK: Ensure email is verified
+//   if (!user.isVerified) {
+//     return next(new AppError('Please verify your email address before logging in.', 401));
+//   }
+
+//     // Inside your login function in authController.ts
+//   if (user.mustChangePassword) {
+//     return res.status(200).json({
+//       status: 'force-reset',
+//       message: `Dear ${user.name}, kindly change your password to login.`,
+//       resetToken: user.createPasswordResetToken() // Optionally generate a token immediately
+//     });
+//   }
+// // 2. Generate the token
+//   // const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+
+//   // 3. SET THE COOKIE HERE (Before the response)
+// //   res.cookie("jwt", token, {
+// //   httpOnly: true,
+// //   secure: true,        // REQUIRED on HTTPS (Render + Vercel)
+// //   sameSite: "none",    // REQUIRED for cross-domain
+// //   maxAge: 7 * 24 * 60 * 60 * 1000
+// // });
+
+
+//   // 2) Send token
+//   createSendToken(user, 200, res);
+// });
 
 export const verifyEmail = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   // 1. Get and hash the token from the URL
@@ -240,9 +300,11 @@ export const logout = (
   req: Request, 
   res: Response
 ) => {
-  res.cookie('jwt', 'loggedout', {
+  res.cookie('jwt', '', {
     expires: new Date(Date.now() + 10 * 1000),  // Expires in 10 seconds
     httpOnly: true,
+    sameSite:'none',
+    secure: process.env.NODE_ENV === 'production'
   });
   res.status(200).json({ status: 'success! please come back, we will miss you' });
 };
