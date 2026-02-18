@@ -22,16 +22,22 @@ export const createSendToken = (
   const userId = user._id.toString();
   const token = signToken(userId);
 
-  const cookieExpiresInDays = Number(process.env.JWT_COOKIE_EXPIRES_IN) || 7;
+  // const cookieExpiresInDays = Number(process.env.JWT_COOKIE_EXPIRES_IN) || 7;
+  const duration = Number(process.env.JWT_COOKIE_EXPIRES_IN) || 7 * 24 * 60 * 60 * 1000;
 
   // 🔒 FORCE correct cross-domain behavior
   res.cookie('jwt', token, {
     httpOnly: true,
     secure: true,      // ALWAYS true on Render + Vercel
     sameSite: 'none',  // REQUIRED for cross-domain cookies
-    expires: new Date(
-      Date.now() + cookieExpiresInDays * 24 * 60 * 60 * 1000
-    )
+    path: '/',        // Ensure cookie is sent on all routes
+    maxAge: duration, // Set maxAge for better compatibility
+    expires: new Date(Date.now() + duration) // Set expires for better compatibility
+    
+    // maxAge: cookieExpiresInDays * 24 * 60 * 60 * 1000, // Set maxAge for better compatibility
+    // expires: new Date(
+    //   Date.now() + cookieExpiresInDays * 24 * 60 * 60 * 1000
+    // )
   });
 
   // Sanitize user safely
