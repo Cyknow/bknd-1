@@ -75,12 +75,13 @@ userSchema.methods.createEmailVerificationToken = function(): string {
   const verificationToken = crypto.randomBytes(32).toString('hex');
 
   // We hash it to store in the DB for security
-  this.emailVerificationToken = crypto
+  const hashed = crypto
     .createHash('sha256')
     .update(verificationToken)
     .digest('hex');
 
-    this.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
+    this.emailVerificationToken = hashed;
+    this.emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000; // 24h
 
   return verificationToken; // Return the unhashed token to send via email
 };

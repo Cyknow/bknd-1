@@ -34,7 +34,11 @@ export const signup = catchAsync(async (
 
   // 1. Generate Verification Token
   const verifyToken = newUser.createEmailVerificationToken();
+  console.log('RAW TOKEN SENT:', verifyToken);
+console.log('HASH STORED IN DB:', newUser.emailVerificationToken);
+
   await newUser.save({ validateBeforeSave: false });
+  
 
   // 2. Create the URL
   // const verifyURL = `${req.protocol}://${req.get('host')}/auth/verifyemail/${verifyToken}`;
