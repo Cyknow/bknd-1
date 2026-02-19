@@ -4,7 +4,10 @@ export const SignupSchema = z.object({
   body: z.object({
     name: z.string({ required_error: "Name is required" }).trim(),
     email: z.string().email("Invalid email format").toLowerCase(),
-    password: z.string().min(8, "Password must be at least 8 characters"),
+    password: z.string().min(8, "Password must be at least 8 characters").trim(). regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+      "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
+    ),
     phone: z.string().optional(),
     })
 });

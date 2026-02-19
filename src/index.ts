@@ -25,12 +25,6 @@ import userMgtRoutes from './routes/userMgtRoutes.js';
 
 const app: Application = express();
 
-//To see exactly what the server thinks it's doing, add this middleware at the very top of your middleware stack (right after creating the Express app). It will log every incoming request's method and URL, giving you a clear trace of all requests hitting your server. This is especially useful for debugging issues related to routing, CORS, or any middleware that might be interfering with requests. Just remember to remove or disable this logging in production to avoid cluttering your logs and potentially exposing sensitive information.
-app.use((req, res, next) => {
-  console.log(`DEBUG: Method: ${req.method} | URL: ${req.url}`);
-  next();
-});
-
 // ✅ Add this line! 
 // '1' tells Express to trust the first hop (Render's proxy)
 app.set('trust proxy', 1);
@@ -52,7 +46,10 @@ app.use(helmet());
 
 app.use(
   cors({
-    origin: "https://wccnigeria.vercel.app",
+    origin: ["https://wccnigeria.vercel.app",
+      'http://localhost:5173', // Local development
+      'https://wccnigeria.vercel.app/' // ✅ ADD YOUR DEPLOYED FRONTEND URL HERE
+    ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"]
@@ -109,6 +106,12 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 // ✅ This MUST come before your routes
 app.use(express.json({ limit: '10kb' }));
 app.use(cookieParser());
+
+//To see exactly what the server thinks it's doing, add this middleware at the very top of your middleware stack (right after creating the Express app). It will log every incoming request's method and URL, giving you a clear trace of all requests hitting your server. This is especially useful for debugging issues related to routing, CORS, or any middleware that might be interfering with requests. Just remember to remove or disable this logging in production to avoid cluttering your logs and potentially exposing sensitive information.
+app.use((req, res, next) => {
+  console.log(`DEBUG: Method: ${req.method} | URL: ${req.url}`);
+  next();
+});
 
 // 4. ROUTES
 app.use('/auth', authRoutes);

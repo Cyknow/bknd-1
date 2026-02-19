@@ -14,7 +14,7 @@ export interface IUser extends Document {
   emailVerificationToken?: string;
   // ✅ Add the method signature here
   createEmailVerificationToken(): string;
-  emailVerificationExpires: Date;
+  emailVerificationExpires?: Date;
   mustChangePassword: boolean;
   passwordResetToken?: string;
   passwordResetExpires?: Date;

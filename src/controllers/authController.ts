@@ -76,7 +76,7 @@ export const signup = catchAsync(async (
   // }
 
   // createSendToken(newUser, 201, res);
-  
+
   // DO NOT call createSendToken(newUser, 201, res) here!
   // Instead, send a plain response:
   res.status(201).json({
@@ -215,7 +215,8 @@ export const verifyEmail = catchAsync(async (req: Request, res: Response, next: 
 
   // 6. Success: Update user status
   user.isVerified = true;
-  user.emailVerificationToken = undefined; 
+  user.emailVerificationToken = undefined;
+  user.emailVerificationExpires = undefined;
   await user.save({ validateBeforeSave: false });
 
   // 7. Redirect to Success Page
