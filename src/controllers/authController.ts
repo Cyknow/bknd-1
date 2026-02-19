@@ -189,11 +189,12 @@ export const login = catchAsync(async (
 export const verifyEmail = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   // 1. Get and hash the token from the URL
   const token = req.params.token as string;
+  console.log('RECEIVED TOKEN FROM URL:', token); // CHECK THIS IN RENDER LOGS
   const hashedToken = crypto
     .createHash('sha256')
     .update(token)
     .digest('hex');
-
+console.log('LOOKING FOR HASH:', hashedToken);
   // 2. Grab the frontend base URL from .env
   const frontendURL = process.env.FRONTEND_URL;
 
