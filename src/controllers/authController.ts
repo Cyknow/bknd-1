@@ -203,16 +203,16 @@ export const verifyEmail = catchAsync(async (req: Request, res: Response, next: 
     emailVerificationExpires: { $gt: Date.now() }
   });
 
-    // 5. CASE: User is already verified (Prevents redundant DB writes)
-  if (user.isVerified) {
-    return res.redirect(`${frontendURL}/signinp?status=already_active`);
-  }
-
   // 4. CASE: Invalid or Expired Token
   if (!user) {
     return res.redirect(`${frontendURL}/verify-issue`);
   }
-  
+
+  // 5. CASE: User is already verified (Prevents redundant DB writes)
+  if (user.isVerified) {
+    return res.redirect(`${frontendURL}/signinp?status=already_active`);
+  }
+
   // 6. Success: Update user status
   user.isVerified = true;
   user.emailVerificationToken = undefined;
