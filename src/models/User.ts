@@ -11,7 +11,7 @@ export interface IUser extends Document {
   role: 'regularUser' | 'admin' | 'senior-admin';
   isVerified: boolean;
   // emailVerificationToken: string,
-  emailVerificationToken?: string;
+  emailVerificationToken?: String;
   // ✅ Add the method signature here
   createEmailVerificationToken(): string;
   emailVerificationExpires?: Date;

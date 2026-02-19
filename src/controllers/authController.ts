@@ -58,7 +58,7 @@ export const signup = catchAsync(async (
       html: getWelcomeTemplate(newUser.name, verifyURL),
     });
   } catch (err) {
-    console.error('Email failed');
+    console.error('Email failed to send:', err);
   }
 
   // // We wrap this in a separate try/catch so a SendGrid error doesn't 
@@ -203,6 +203,10 @@ console.log('LOOKING FOR HASH:', hashedToken);
     emailVerificationToken: hashedToken,
     emailVerificationExpires: { $gt: Date.now() }
   });
+
+  const checkUser = await User.findOne({ emailVerificationToken: hashedToken });
+console.log("USER FOUND BY TOKEN ONLY:", checkUser ? 'YES' : 'NO');
+if (checkUser) console.log("EXPIRY IN DB:", checkUser.emailVerificationExpires, "NOW:", new Date());
 
   // 4. CASE: Invalid or Expired Token
   if (!user) {
