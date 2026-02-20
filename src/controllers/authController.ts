@@ -23,9 +23,13 @@ import { getWelcomeTemplate } from '../utils/welcomeEmail.js';
 export const signup = catchAsync(async (
   req: Request <{}, {}, SignupInput>, // Typed Body
   res: Response, 
-  // next: NextFunction 
+  next: NextFunction 
 ) => {
   // No need for "if (!req.body.name)" anymore. Zod guaranteed it exists.
+  const existingUser = await User.findOne({ email: req.body.email });
+if (existingUser) {
+  return next(new AppError('User already exists. Please login.', 400));
+}
   // Zod already stripped unwanted fields and validated requirements
   // const newUser = await User.create(req.body);
   const newUser = new User(req.body);
